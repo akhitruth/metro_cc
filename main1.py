@@ -11,13 +11,16 @@ def find_closest_match(input_str, options):
     # print(options)
     closest_match = difflib.get_close_matches(
         input_str.title(), options, n=1, cutoff=0.8)
+    #Check for nulls in closest match
+    if closest_match.__len__()>0:
+        
     # print(closest_match)
-    indexOfDataFound = options.index(closest_match[0])
-    # print("Index: ", indexOfDataFound)
-    if indexOfDataFound is not None:
-        return indexOfDataFound
-    else:
-        return None
+        indexOfDataFound = options.index(closest_match[0])
+        # print("Index: ", indexOfDataFound)
+        if indexOfDataFound is not None:
+            return indexOfDataFound
+        else:
+            return None
 
 
 fromStn = input("From: ")
@@ -44,65 +47,69 @@ if toStnIndex is not None:
     toStn = list(d.values())[toStnIndex]
 else:
     print(f"Could not find a matching station for '{toStn}'")
-
-url = url.replace("*destination*", toStn)
-
-url = url.replace("*source*", fromStn)
-
-response = requests.get(url)
-if response.status_code == 200:
-    data = json.loads(response.text)
-    # pprint.pprint(data)
-
-    stations = data['stations']
     
-    total_time = data['total_time']
-    fare = data['fare']
-    line = (data['route'][0]['line'])
-    line_number = (data['route'][0]['line_no'])
-    towards_station = (data['route'][0]['towards_station'])
-    
-    print(
-        f"No. of stations: {stations}, Total time: {total_time}, Total Fare: {fare} .")
+    #added by akhilesh
+if fromStnIndex is not None or toStnIndex is not None:
+    url = url.replace("*destination*", toStn)
 
-    
-    # data['route'][0]['start']
-    # Region Displaying boarding station info
-    input_boarding_info_askuser = input(
-        'Do you want boarding station information: (yes/no) ? ')
-    if input_boarding_info_askuser.lower() == 'yes':
-        output_boarding_info = f"Board at station: {data['route'][0]['start']}, Towards Station: {data['route'][0]['towards_station']}, in Platform : {data['route'][0]['platform_name']} "
-        print(output_boarding_info)  # output boarding information
-    elif input_boarding_info_askuser.lower() == 'no':
-        pass
-    else:
-        print('Did not match your response')
-    # end region
+    url = url.replace("*source*", fromStn)
 
+    response = requests.get(url)
+    if response.status_code == 200:
+        data = json.loads(response.text)
+        # pprint.pprint(data)
 
-    if int(len(data['route'])) > 1:
-        input_interchange_info_askuser = input(
-            'Do you want interchange station information: (yes/no) ? ')  # Displaying interchange station information
-        if input_interchange_info_askuser.lower() == 'yes':
-            
-            outputStations=[]
-            interchange_list_stationsname = "" 
-            for i in range(1, len(data['route'])):
-                interchange_list_stationsname = data['route'][i]['start'] 
-                outputStations.append(interchange_list_stationsname)
+        stations = data['stations']
+        
+        total_time = data['total_time']
+        fare = data['fare']
+        line = (data['route'][0]['line'])
+        line_number = (data['route'][0]['line_no'])
+        towards_station = (data['route'][0]['towards_station'])
+        
+        print(
+            f"No. of stations: {stations}, Total time: {total_time}, Total Fare: {fare} .")
 
-            output_interchange_info = "No of Interchange stations are: " + \
-                str(len(data['route'])-1)+'\n'+'Namely:'
-            print(output_interchange_info, outputStations)
-            
-            # print(outputStations)
-        elif input_interchange_info_askuser.lower() == 'no':
+        
+        # data['route'][0]['start']
+        # Region Displaying boarding station info
+        input_boarding_info_askuser = input(
+            'Do you want boarding station information: (yes/no) ? ')
+        if input_boarding_info_askuser.lower() == 'yes':
+            output_boarding_info = f"Board at station: {data['route'][0]['start']}, Towards Station: {data['route'][0]['towards_station']}, in Platform : {data['route'][0]['platform_name']} "
+            print(output_boarding_info)  # output boarding information
+        elif input_boarding_info_askuser.lower() == 'no':
             pass
         else:
             print('Did not match your response')
+        # end region
 
-        # print(f"Board at station: {data['route'][0]['start']}, Towards Station:{data['route'][0]['end']}, in platform :{data['route'][0]['platform_name']} ")
+
+        if int(len(data['route'])) > 1:
+            input_interchange_info_askuser = input(
+                'Do you want interchange station information: (yes/no) ? ')  # Displaying interchange station information
+            if input_interchange_info_askuser.lower() == 'yes':
+                
+                outputStations=[]
+                interchange_list_stationsname = "" 
+                for i in range(1, len(data['route'])):
+                    interchange_list_stationsname = data['route'][i]['start'] 
+                    outputStations.append(interchange_list_stationsname)
+
+                output_interchange_info = "No of Interchange stations are: " + \
+                    str(len(data['route'])-1)+'\n'+'Namely:'
+                print(output_interchange_info, outputStations)
+                
+                # print(outputStations)
+            elif input_interchange_info_askuser.lower() == 'no':
+                pass
+            else:
+                print('Did not match your response')
+
+            # print(f"Board at station: {data['route'][0]['start']}, Towards Station:{data['route'][0]['end']}, in platform :{data['route'][0]['platform_name']} ")
 
 
-else:
-    print(f"Error: {response.status_code}")
+    else:
+        print(f"Error: {response.status_code}")
+else: 
+    pass        
