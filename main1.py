@@ -1,8 +1,7 @@
 import requests
 import json
-import pprint
-import requests
 import difflib
+import mysql.connector as c
 
 url = "http://139.59.31.166:8000/api/v2/en/station_route/*source*/*destination*/least-distance/2023-07-12%2010:36:00.000000"
 
@@ -23,19 +22,27 @@ def find_closest_match(input_str, options):
             return None
 
 
+
+
+
 fromStn = input("From: ")
 toStn = input("To: ")
 
 d = {'Rajiv Chowk': 'RCK', 'Kashmere Gate': 'KG', 'Saket': 'SAKT', 'ANAND VIHAR ISBT': 'AVIT', 'ADARSH NAGAR': 'AHNR', 'LAL QUILA': 'LLQA', 'JAMA MASJID': 'JAMD', 'DELHI GATE': 'DLIG', 'CHANDNI CHOWK': 'CHK', 'CHAWRI BAZAR': 'CWBR', 'MANDI HOUSE': 'MDHS', 'BARAKHAMBA ROAD': 'BRKR', 'NEW DELHI': 'NDI', 'UDYOG BHAWAN': 'UDB', 'JOR BAGH': 'JB', 'QUTAB MINAR': 'QM', 'SAMAYPUR BADLI': 'SPBI', 'HAIDERPUR BADLI MOR': 'BIMR', 'GURU TEG BAHADUR NAGAR': 'GTBR', 'VIDHAN SABHA': 'VS', 'SHAHEED STHAL': 'NBAA', 'NEW BUS ADDA': 'NBAA', 'NOIDA CITY CENTRE': 'NCC', 'CHHATARPUR': 'CHTP', 'GURU DRONACHARYA': 'GE', 'IFFCO CHOWK': 'IFOC', 'MILLENNIUM CITY CENTRE GURUGRAM': 'HCC', 'HUDA CITY CENTRE GURUGRAM': 'HCC', 'ROHINI SECTOR': 'RISE', 'CIVIL LINES': 'CL', 'DILLI HAAT - INA': 'INA', 'GREEN PARK': 'GNPK', 'SIKANDERPUR': 'SKRP', 'OLD FARIDABAD': 'OFDB', 'JAFRABAD': 'JFRB', 'GOLF COURSE': 'GEC', 'NAJAFGARH': 'NFGH', 'LOK KALYAN MARG': 'LKM', 'JAFRABAD': 'JFRB', 'GOLF COURSE': 'GEC', 'NAJAFGARH': 'NFGH', 'LOK KALYAN MARG': 'LKM', 'JAFRABAD': 'JFRB', 'GOLF COURSE': 'GEC', 'NAJAFGARH': 'NFGH', 'LOK KALYAN MARG': 'LKM', 'JAFRABAD': 'JFRB', 'GOLF COURSE': 'GEC', 'NAJAFGARH': 'NFGH', 'LOK KALYAN MARG': 'LKM', 'JAFRABAD': 'JFRB',
      'GOLF COURSE': 'GEC', 'NAJAFGARH': 'NFGH', 'LOK KALYAN MARG': 'LKM', 'JAFRABAD': 'JFRB', 'GOLF COURSE': 'GEC', 'NAJAFGARH': 'NFGH', 'LOK KALYAN MARG': 'LKM', 'MALVIYA NAGAR': 'MVNR', 'GHITORNI': 'GTNI', 'ARJAN GARH': 'AJG', 'VAISHALI': 'VASI', 'MALVIYA NAGAR': 'MVNR', 'GHITORNI': 'GTNI', 'ARJAN GARH': 'AJG', 'VAISHALI': 'VASI', 'MALVIYA NAGAR': 'MVNR', 'GHITORNI': 'GTNI', 'ARJAN GARH': 'AJG', 'VAISHALI': 'VASI', 'ITO': 'ITO', 'JAHANGIRPURI': 'JGPI', 'MAJOR MOHIT SHARMA RAJENDRA NAGAR': 'RJNM', 'MAJOR MOHIT SHARMA': 'RJNM', 'RAJENDRA NAGAR': 'RJNM', 'RAJ BAGH': 'RJBH', 'JHILMIL': 'JLML', 'NETAJI SUBHASH PLACE': 'NSHP',  'PUNJABI BAGH': 'PBGA', 'SULTANPUR': 'SLTP', 'AIIMS': 'AIIMS', 'MG ROAD': 'MGRO', 'AZADPUR': 'AZU', 'PATEL CHOWK': 'PTCK', 'VISWAVIDYALAYA': 'VW', 'HINDON RIVER': 'HDNR', 'MANSAROVAR PARK': 'MPK', 'LAXMI NAGAR': 'LN', 'MAYUR VIHAR EXTENSION': 'MVE', 'MAYUR VIHAR': 'MVE', 'SHYAM PARK': 'SMPK', 'HAUZ KHAS': 'HKS', 'TIS HAZARI': 'TZI', 'SADAR BAZAR CANTONMENT': 'SABR', 'SHYAM PARK': 'SMPK', 'HAUZ KHAS': 'HKS', 'TIS HAZARI': 'TZI', 'SADAR BAZAR CANTONMENT': 'SABR', 'SADAR BAZAR': 'SABR', 'SARAI KALE KHAN - NIZAMUDDIN': 'NIZM', 'NIZAMUDDIN': 'NIZM', 'EAST AZAD NAGAR': 'EANR'}
-
+#Fetching Station-Names from Databse
+#con =c.connect(host="localhost", user="root", passwd="",database="chatbot_dmrc")
+#cursor=con.cursor()
+#cursor.execute("SELECT Station_Name,Station_Code FROM master_station")
+#d= cursor.fetchall()
+#d= dict(d)
 
 fromStnIndex = find_closest_match(fromStn, list(
     map(lambda x: x.title(), list(d.keys()))))
-# print("From Index: ", fromStnIndex)
+
 toStnIndex = find_closest_match(toStn, list(
     map(lambda x: x.title(), list(d.keys()))))
-# print("To Index: ", toStnIndex,type(fromStnIndex), type(toStnIndex))
+
 
 
 if fromStnIndex is not None:
@@ -60,7 +67,6 @@ if fromStnIndex is not None or toStnIndex is not None:
         # pprint.pprint(data)
 
         stations = data['stations']
-        
         total_time = data['total_time']
         fare = data['fare']
         line = (data['route'][0]['line'])
@@ -91,10 +97,10 @@ if fromStnIndex is not None or toStnIndex is not None:
             if input_interchange_info_askuser.lower() == 'yes':
                 
                 outputStations=[]
-                interchange_list_stationsname = "" 
+                #interchange_list_stationsname = "" 
                 for i in range(1, len(data['route'])):
-                    interchange_list_stationsname = data['route'][i]['start'] 
-                    outputStations.append(interchange_list_stationsname)
+                    #interchange_list_stationsname = data['route'][i]['start'] 
+                    outputStations.append(data['route'][i]['start'])
 
                 output_interchange_info = "No of Interchange stations are: " + \
                     str(len(data['route'])-1)+'\n'+'Namely:'
@@ -112,4 +118,5 @@ if fromStnIndex is not None or toStnIndex is not None:
     else:
         print(f"Error: {response.status_code}")
 else: 
-    pass        
+    pass 
+#cursor.close()       
