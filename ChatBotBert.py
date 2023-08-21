@@ -1,22 +1,20 @@
-import pandas as pd
-import numpy as np
+#import pandas as pd
+#import numpy as np
 from tqdm.auto import tqdm
 from scipy.spatial.distance import cosine
 import tensorflow as tf
-from torch.utils.data import TensorDataset
+#from torch.utils.data import TensorDataset
 #import torch
 import requests
 import json
-#import main1
-#import pprint
 import difflib
 import mysql.connector as c
-#from transformers import DistilBertTokenizer
-# from transformers import BertTokenizer
+import re
 
 # from google.colab import files
 # upload= files.upload()
 
+# # Load the DistilBERT tokenizer and model
 from transformers import DistilBertTokenizer, TFDistilBertModel
 tokenizer = DistilBertTokenizer.from_pretrained("distilbert-base-uncased")
 model = TFDistilBertModel.from_pretrained("distilbert-base-uncased", output_hidden_states=True)
@@ -25,10 +23,6 @@ similarity_threshold = 0.85
 
 # from transformers import DistilBertTokenizer, TFDistilBertModel
 
-# # Load the DistilBERT tokenizer and model
-# tokenizer = DistilBertTokenizer.from_pretrained("distilbert-base-uncased")
-# model = TFDistilBertModel.from_pretrained("distilbert-base-uncased", output_hidden_states=True)
-
 # Load the FAQ questions and answers from the Excel file
 #df = pd.read_excel("newchatbot1.xlsx")
 con =c.connect(host="localhost", user="root", passwd="",database="chatbot_dmrc")
@@ -36,6 +30,12 @@ cursor=con.cursor()
 cursor.execute("SELECT 	Query as Question,Response as Answer FROM excel_import_chatbotqueries")
 df= cursor.fetchall()
 faq_dict = dict(df)
+
+#Fetching Station-Names from Databse
+cursor.execute("SELECT Station_Name,Station_Code FROM master_station")
+d= cursor.fetchall()
+d= dict(d)  
+
 #for index, row in df.iterrows():
 #    question = row["Question"]
 #    answer = row["Answer"]
@@ -89,12 +89,12 @@ def routeInfo():
     #    'GOLF COURSE': 'GEC', 'NAJAFGARH': 'NFGH', 'LOK KALYAN MARG': 'LKM', 'JAFRABAD': 'JFRB', 'GOLF COURSE': 'GEC', 'NAJAFGARH': 'NFGH', 'LOK KALYAN MARG': 'LKM', 'MALVIYA NAGAR': 'MVNR', 'GHITORNI': 'GTNI', 'ARJAN GARH': 'AJG', 'VAISHALI': 'VASI', 'MALVIYA NAGAR': 'MVNR', 'GHITORNI': 'GTNI', 'ARJAN GARH': 'AJG', 'VAISHALI': 'VASI', 'MALVIYA NAGAR': 'MVNR', 'GHITORNI': 'GTNI', 'ARJAN GARH': 'AJG', 'VAISHALI': 'VASI', 'ITO': 'ITO', 'JAHANGIRPURI': 'JGPI', 'MAJOR MOHIT SHARMA RAJENDRA NAGAR': 'RJNM', 'MAJOR MOHIT SHARMA': 'RJNM', 'RAJENDRA NAGAR': 'RJNM', 'RAJ BAGH': 'RJBH', 'JHILMIL': 'JLML', 'NETAJI SUBHASH PLACE': 'NSHP',  'PUNJABI BAGH': 'PBGA', 'SULTANPUR': 'SLTP', 'AIIMS': 'AIIMS', 'MG ROAD': 'MGRO', 'AZADPUR': 'AZU', 'PATEL CHOWK': 'PTCK', 'VISWAVIDYALAYA': 'VW', 'HINDON RIVER': 'HDNR', 'MANSAROVAR PARK': 'MPK', 'LAXMI NAGAR': 'LN', 'MAYUR VIHAR EXTENSION': 'MVE', 'MAYUR VIHAR': 'MVE', 'SHYAM PARK': 'SMPK', 'HAUZ KHAS': 'HKS', 'TIS HAZARI': 'TZI', 'SADAR BAZAR CANTONMENT': 'SABR', 'SHYAM PARK': 'SMPK', 'HAUZ KHAS': 'HKS', 'TIS HAZARI': 'TZI', 'SADAR BAZAR CANTONMENT': 'SABR', 'SADAR BAZAR': 'SABR', 'SARAI KALE KHAN - NIZAMUDDIN': 'NIZM', 'NIZAMUDDIN': 'NIZM', 'EAST AZAD NAGAR': 'EANR'}
     
     #Fetching Station-Names from Databse
-    con =c.connect(host="localhost", user="root", passwd="",database="chatbot_dmrc")
+    '''con =c.connect(host="localhost", user="root", passwd="",database="chatbot_dmrc")
     cursor=con.cursor()
     cursor.execute("SELECT Station_Name,Station_Code FROM master_station")
     d= cursor.fetchall()
     d= dict(d)
-    cursor.close() 
+    cursor.close() '''
     fromStnIndex = find_closest_match(fromStn, list(
         map(lambda x: x.title(), list(d.keys()))))
     # print("From Index: ", fromStnIndex)
@@ -138,20 +138,23 @@ def routeInfo():
             # print("Towards Station:", towards_station)
             # akhilesh_code'
             # data['route'][0]['start']
-            input_boarding_info_askuser = input(
-                'Do you want boarding station information: (yes/no) ?')
-            if 'yes' in input_boarding_info_askuser.lower():
+            #re.sub('\W+', ' ',question)
+            #input_boarding_info_askuser = input(
+            #   'Do you want boarding station information: (yes/no) ?')
+            input_boarding_info_askuser = re.sub('\W+', ' ',input('Do you want boarding station information: (yes/no) ?')[:1500])
+            
+            if 'y' in input_boarding_info_askuser.lower():
                 output_boarding_info = f"Board at station: {data['route'][0]['start']}, Towards Station: {data['route'][0]['towards_station']}, in Platform : {data['route'][0]['platform_name']} "
                 print(output_boarding_info)  # output boarding information
-            elif 'no' in input_boarding_info_askuser.lower():
+            elif 'n' in input_boarding_info_askuser.lower():
                 pass
             else:
                 print('Did not match your response')
 
             if int(len(data['route'])) > 1:
-                input_interchange_info_askuser = input(
-                    'Do you want interchange station information: (yes/no) ?')
-                if 'yes' in input_interchange_info_askuser.lower():
+                input_interchange_info_askuser = re.sub('\W+', ' ',input(
+                    'Do you want interchange station information: (yes/no) ?')[:1500])
+                if 'y' in input_interchange_info_askuser.lower():
                     '''output_interchange_info = "No of Interchange station: " + \
                         str(len(data['route'])-1)
                     interchange_list_stationsname = ''
@@ -174,7 +177,7 @@ def routeInfo():
                     output_interchange_info = "No of Interchange stations are: " + \
                         str(len(data['route'])-1)+'\n'+'Namely:'
                     print(output_interchange_info, outputStations)
-                elif 'no' in input_interchange_info_askuser.lower():
+                elif 'n' in input_interchange_info_askuser.lower():
                     pass
                 else:
                     print('Did not match your response')
@@ -233,10 +236,13 @@ def main():
         
 def AskUserToProceed(flag):  #Recursive method 
     while(flag):
-        Questanyother = input('Do you have any other question? (y/n): ').lower().strip()
+        Questanyother = re.sub('\W+', ' ',input('Do you have any other question? (y/n): ')[:1500].lower().strip())
         if 'y' in Questanyother:
                 question = input("Enter your question: ")
-                GetAnswer(question, faq_dict)
+                if "route" in question.lower():   
+                    routeInfo()
+                else:                  
+                    GetAnswer(question, faq_dict)
         elif 'n' in Questanyother:
             flag=False
         else:
