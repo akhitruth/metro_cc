@@ -28,9 +28,26 @@ try:
     #df = pd.read_excel("newchatbot1.xlsx")
     con =c.connect(host="localhost", user="root", passwd="",database="chatbot_dmrc")
     cursor=con.cursor()
-    cursor.execute("SELECT 	Query as Question,Response as Answer FROM excel_import_chatbotqueries")
-    df= cursor.fetchall()
-    faq_dict = dict(df)
+    #cursor.execute("SELECT 	Query as Question,Response as Answer FROM excel_import_chatbotqueries")
+    #df= cursor.fetchall()
+    #faq_dict = dict(df)
+    #fetching complaint tables
+    cursor.execute("SELECT 	Query as Question,Response as Answer FROM master_complaint")
+    dict_complaint = dict(cursor.fetchall())
+    #fetching QR table
+    cursor.execute("SELECT 	Query as Question,Response as Answer FROM master_qr")
+    dict_qr = dict(cursor.fetchall())
+    #fetching Parking nd divyanjan
+    cursor.execute("SELECT 	Query as Question,Response as Answer FROM master_parking_divyangjan")
+    dict_parking_divyan = dict(cursor.fetchall())
+    #fetching smart card from backend
+    cursor.execute("SELECT 	Query as Question,Response as Answer FROM master_smartcard_ncmc")
+    dict_smartcard = dict(cursor.fetchall())
+    #fetching Misc from backend
+    cursor.execute("SELECT 	Query as Question,Response as Answer FROM master_misc")
+    dict_misc = dict(cursor.fetchall())
+    
+    
 
     #Fetching Station-Names from Databse
     cursor.execute("SELECT Station_Name,Station_Code FROM master_station")
@@ -115,7 +132,7 @@ try:
             print(f"Could not find a matching station for '{toStn}'")
 
         #added by akhilesh
-        if fromStnIndex is not None or toStnIndex is not None:
+        if fromStnIndex is not None and toStnIndex is not None:
             url = url.replace("*destination*", toStn)
             url = url.replace("*source*", fromStn)
             print("Processing your request...")
@@ -200,18 +217,51 @@ try:
     def main():
         
         flag = True
+        print("Hi! I'm DMRC bot. How May I help you? \n")
 
         while flag:
             #empty the previous question
             question=''
+            
             # Ask the user a questi'on
-            question = input("Hi! I'm DMRC bot. How May I help you? \n If query related to metro route or fare of journey, type \"route\" \n To exit chatbot, type \"exit\" \n else: \n Enter your question: ")
-
+            '''question = input("Hi! I'm DMRC bot. How May I help you? \n If query related to metro route or fare of journey, type \"route\" \n To exit chatbot, type \"exit\" \n else: \n Enter your question: ")'''
+            #question = re.sub('\W+', ' ',input("\n If query related to metro route or fare of journey, type \"route\" \n If query related to QR Tickets, type \"QR\" \n If query related to metro parking or Divyangjan, type \"Parking\" Or \"Divyangjan\" \n If query related to metro SmartCards,Tokens, type \"SmartCards\" \n If query related to miscellaneous , type \"Misc\" \n If query related to complaints , type \"Complaint\"  \n To exit chatbot, type \"exit\"\n")[:1500].lower().strip())
+            quest_menu = re.sub('\W+', ' ',input("If query related to metro route or fare of journey, type: \"1\"\nIf query related to QR Tickets, type: \"2\" \nIf query related to metro parking or Divyangjan, type: \"3\" \nIf query related to metro SmartCards,Tokens, type: \"4\" \nIf query related to miscellaneous , type: \"5\" \nIf query related to complaints , type: \"6\"  \nTo exit chatbot, type: \"7\"\n"))
+            if(re.match(r'^[1-7]$',quest_menu.strip())):
+                if(int(quest_menu)==1):
+                    routeInfo()
+                elif(int(quest_menu)==7):
+                    print("Goodbye!")
+                    flag=False
+                    break
+                else:
+                    print("Please wait...")
+                    question = input("\n Enter your question: ")
+                    if(int(quest_menu)==2):
+                        GetAnswer(question, dict_qr)
+                    elif(int(quest_menu)==3):
+                        GetAnswer(question, dict_parking_divyan)
+                    elif(int(quest_menu)==4):
+                        GetAnswer(question, dict_smartcard)
+                    elif(int(quest_menu)==5):    
+                        GetAnswer(question, dict_misc)
+                    elif(int(quest_menu)==6):
+                        GetAnswer(question, dict_complaint)
+                if(AskUserToProceed(flag)):
+                    pass
+                else:
+                    flag=False           
+            else:
+                print('Enter a valid response')
+                
+                        
+                    
             #if question.lower()=='route':
             #added by akhilesh 
-            if "route" in question.lower():   
-                routeInfo()
-                flag= AskUserToProceed(flag)
+            #if "route" in question.lower():   
+                
+                
+                
                 '''if 'y' in input('Do you have any other question? (y/n): ').lower().strip():
                     question = input("\n Enter your question: ")
                     GetAnswer(question, faq_dict)
@@ -220,34 +270,59 @@ try:
                     
                 #continue
 
-            elif question.lower() == "exit":
-                print("Goodbye!")
-                flag=False
-                break
-            
-            else: # for any other questions
-                print("Please wait...")
-                GetAnswer(question, faq_dict)
+            #elif question.lower() == "exit":
+            #    print("Goodbye!")
+            #    flag=False
+                
+            #else: # for any other questions
+                #print("Please wait...")
+                #if('qr' in question):
+                #    GetAnswer(question, dict_qr)
+                #elif('parking' in question or 'divyangjan' in question):
+                #     GetAnswer(question, dict_parking_divyan)
+                #elif('smartcards' in question ):
+                #    GetAnswer(question, dict_smartcard)
+                #elif('misc' in question ):    
+                #    GetAnswer(question, dict_misc)
+                #elif('complaint' in question):
+                #    GetAnswer(question, dict_complaint)
+                #elif question.lower() == "exit":
+                #    print("Goodbye!")
+                #   flag=False
+                #else:
+                #    print("Sorry, I couldn't find a similar question in the dataset.")
+                        
+                        
+                
+                    
+                        
+                        
+                    
                 '''if 'y' in input('Do you have any other question? (y/n): ').lower().strip():
                     question = input('\n Enter your question: ')
                     GetAnswer(question, faq_dict) 
                 else:
                     flag=False''' 
-                flag = AskUserToProceed(flag)    
+                #flag = AskUserToProceed(flag)    
+            
+            '''else: # for any other questions
+                print("Please wait...")
+                GetAnswer(question, faq_dict)
+               
+                flag = AskUserToProceed(flag)'''    
             
     def AskUserToProceed(flag):  #Recursive method 
         while(flag):
             Questanyother = re.sub('\W+', ' ',input('Do you have any other question? (y/n): ')[:1500].lower().strip())
             if 'y' in Questanyother:
-                    question = input("Enter your question: ")
-                    if "route" in question.lower():   
-                        routeInfo()
-                    else:                  
-                        GetAnswer(question, faq_dict)
+                flag=True  
+                break       
             elif 'n' in Questanyother:
                 flag=False
+                print("Goodbye!")
+                break
             else:
-                print('Did not understood your response')
+                print('Enter your Response again')
         return flag       
                     
         
