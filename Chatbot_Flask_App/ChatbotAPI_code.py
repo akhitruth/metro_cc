@@ -12,17 +12,19 @@ try:
     import mysql.connector as c
     import re
     import json
+    import logging
 
     # from google.colab import files
     # upload= files.upload()
-
+    #logging.basicConfig(filename='ChatBotLogs.log',level = logging.INFO,format='%(asctime)s,%(levelname)s,%(name)s,%(message)s')
     # # Load the DistilBERT tokenizer and model
     from transformers import DistilBertTokenizer, TFDistilBertModel
     tokenizer = DistilBertTokenizer.from_pretrained("distilbert-base-uncased")
     model = TFDistilBertModel.from_pretrained("distilbert-base-uncased", output_hidden_states=True)
     similarity_threshold = 0.85
     #flag = True
-
+    logging.basicConfig(filename='ChatBotLogs.log',level = logging.INFO,format='%(asctime)s,%(levelname)s,Functioname: (%(funcName)s), %(message)s')
+    
     # from transformers import DistilBertTokenizer, TFDistilBertModel
 
     # Load the FAQ questions and answers from the Excel file
@@ -101,6 +103,8 @@ try:
             else:
                 return None
     def Get_Answer_routeInfo(x, ques):
+        logging.debug('Fetching Route')
+        logging.info('Fetching Route')
         answer = ''
         url = "http://139.59.31.166:8000/api/v2/en/station_route/*source*/*destination*/least-distance/2023-07-12%2010:36:00.000000"
         
@@ -167,10 +171,10 @@ try:
                     for i in range(1, len(data['route'])):
                         #interchange_list_stationsname = data['route'][i]['start'] 
                         outputStations.append(data['route'][i]['start'])
-                    output_interchange_info = "No of Interchange stations are: " + \
+                    output_interchange_info = "\nNo of Interchange stations are: " + \
                         str(len(data['route'])-1)+'\n'+'Namely:'
                     answer+=(output_interchange_info + ','.join([str(ele) for ele in outputStations]))
-                    
+        logging.info('Route Fetch successfully')            
         return answer      
          
     '''       
@@ -290,8 +294,15 @@ try:
     #added by akhilesh
     #ques=input("Hi! I'm DMRC bot. How May I help you? \n If query related to metro route or fare of journey, type \"route\" \n To exit chatbot, type \"exit\" \n else: \n Enter your question: ?")
     #if "route" in ques.lower():
+    def menu():
+        logging.info('Displaying Menu')
+        dict_menu = "If query related to metro route or fare of journey, type: \"1\"\nIf query related to QR Tickets, type: \"2\" \nIf query related to metro parking or Divyangjan, type: \"3\" \nIf query related to metro SmartCards,Tokens, type: \"4\" \nIf query related to miscellaneous , type: \"5\" \nIf query related to complaints , type: \"6\"  \nTo exit chatbot, type: \"7\"\n"
+        return dict_menu
+    
+    '''
     #   routeInfo()
     def menu(flag):
+        logging.info('Displaying Menu')
         display_text ={} 
         title_text = "Hi! I'm DMRC bot. How May I help you?"
         dict_menu = {1: "metro route or fare of journey",
@@ -312,7 +323,8 @@ try:
         #     "displayText": "hjwfdiw"
         # }
         # return json.dumps(returnJson)
-        return (display_text)
+        return (display_text) 
+    '''
                
     '''   
     def main():
@@ -354,7 +366,7 @@ try:
                     flag=False           
             else:
                 print('Enter a valid response')
-            '''    
+    '''    
                         
             
     def AskUserToProceed(flag):  #Recursive method 
@@ -389,6 +401,7 @@ try:
         
         #Call from API    
     def Get_Answer(x, question):
+        logging.info("Fetching Answer from Dataset")
         if(x==2):
             faq_dict =dict_qr
         elif(x==3):   
@@ -412,13 +425,16 @@ try:
                 
         else:
             answer = "Sorry, I couldn't find a similar question in the dataset." 
+        logging.info("Answers fetched successfully from Dataset")    
         return answer           
     '''
     if __name__ == "__main__":
         main() 
     '''
+    
+    
 except Exception as e:
-    print(f"Something else went wrong: {e}")
+    logging.error("Something else went wrong: {e}")
 finally:
     #con.close()
     pass
