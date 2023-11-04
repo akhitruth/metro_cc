@@ -8,7 +8,6 @@ try:
     import re
     app = Flask(__name__)
     
-    #@lru_cache(maxsize = None)
     @app.route('/home')
     def getMenu():
         t1_start = perf_counter() 
@@ -32,7 +31,7 @@ try:
                 t2_end = perf_counter()
                 #return jsonify({'ans': ans})
                 return ans + f'\n Execution time:  {t2_end - t1_start:.3}s '
-                
+      
             #elif(x==7):
             elif(x==4):
                 #return jsonify({'pagename': "Goodbye!"})
@@ -47,15 +46,13 @@ try:
             #return jsonify({'title_text': 'Invalid Menu Item'})
             t2_end = perf_counter()
             return 'Invalid Menu Item' + f'\n Execution time:  {t2_end - t1_start:.3}s '  
-
-             
+           
     if __name__=="__main__":
         logging.info('*********** Start of program ***************') 
         #getMenu.cache_clear()
         
         app.run(host='0.0.0.0', port=8080)
         app.run(debug=True)
-    
-             
+                
 except Exception as e:
     logging.exception(" Something else went wrong: {e} in function:")
