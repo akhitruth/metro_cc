@@ -2,12 +2,14 @@ try:
     from flask import Flask, request
     import logging
     #from ChatbotAPI_code import menu, Get_Answer,Get_Answer_routeInfo
-    from ChatbotAPI_code import menu, Get_Answer,Get_Answer_routeInfo
+    #from ChatbotAPI_code import menu, Get_Answer,Get_Answer_routeInfo
+    from apps.ChatbotAPI_code import menu
     #from functools import lru_cache
     from time import perf_counter
     import re
     app = Flask(__name__)
     
+    #@lru_cache(maxsize = None)
     @app.route('/home')
     def getMenu():
         t1_start = perf_counter() 
@@ -21,6 +23,7 @@ try:
         
     @app.route('/home/', methods=["POST"])
     def GetAnswer():
+        from apps.ChatbotAPI_code import Get_Answer, Get_Answer_routeInfo
         x:int = request.json['menu_item'] 
         ques = request.json['question']
         logging.info('Post Request To Home method')
@@ -31,7 +34,7 @@ try:
                 t2_end = perf_counter()
                 #return jsonify({'ans': ans})
                 return ans + f'\n Execution time:  {t2_end - t1_start:.3}s '
-      
+                
             #elif(x==7):
             elif(x==4):
                 #return jsonify({'pagename': "Goodbye!"})
@@ -46,13 +49,15 @@ try:
             #return jsonify({'title_text': 'Invalid Menu Item'})
             t2_end = perf_counter()
             return 'Invalid Menu Item' + f'\n Execution time:  {t2_end - t1_start:.3}s '  
-           
+
+             
     if __name__=="__main__":
         logging.info('*********** Start of program ***************') 
         #getMenu.cache_clear()
         
         app.run(host='0.0.0.0', port=8080)
         app.run(debug=True)
-                
+    
+             
 except Exception as e:
     logging.exception(" Something else went wrong: {e} in function:")
