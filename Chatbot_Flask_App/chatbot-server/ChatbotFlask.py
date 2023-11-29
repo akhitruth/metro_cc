@@ -6,22 +6,25 @@ try:
     from apps.ChatbotAPI_code import menu
     #from functools import lru_cache
     from time import perf_counter
+    from flask_cors import cross_origin
     import re
     app = Flask(__name__)
     
     #@lru_cache(maxsize = None)
     @app.route('/home')
+    @cross_origin()
     def getMenu():
         t1_start = perf_counter() 
         logging.info('Get Request To Home method')
         data = menu()
         logging.info('Get Response From Home Method')
-        t2_end = perf_counter()
+        t2_end = perf_counter() 
     
         #data = data + 'cache info is: "/' +cacheinfo + '"/' 
         return (data + f'Execution time:  {t2_end - t1_start:.3}s ')
         
     @app.route('/home/', methods=["POST"])
+    @cross_origin()
     def GetAnswer():
         from apps.ChatbotAPI_code import Get_Answer, Get_Answer_routeInfo
         x:int = request.json['menu_item'] 
